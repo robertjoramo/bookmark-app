@@ -15,7 +15,9 @@
     <ul>
         {% for bookmark in bookmarks %}
         <li>
-            <a href="{{ bookmark.url }}" target="_blank">{{ bookmark.title or bookmark.url }}</a>
+            <a href="{{ bookmark.url }}" target="_blank">[{{ bookmark.id }}] {{ bookmark.title or bookmark.url }} </a>
+            <form action="/api/bookmarks/{{ bookmark.id }}/delete" method="post"><button type="submit">Delete</button></form>
+            <form action="/api/bookmarks/{{ bookmark.id }}/update" method="post"><input type="text" name="new_title" placeholder="{{ bookmark.title or '' }}""><button type="submit">Update</button></form>
         </li>
         {% endfor %}
     </ul>

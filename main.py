@@ -65,6 +65,30 @@ async def add_bookmark(url: str = Form(...), title: Optional[str] = Form(None)):
     conn.close()
     return bookmark
 
+# API: Delete a bookmark
+@app.post("/api/bookmarks/{id}/delete")
+async def delete_bookmark(id):
+    conn = get_db()
+    cursor = conn.execute(
+        "DELETE FROM bookmarks WHERE id=?",
+        (id)
+    )
+    conn.commit()
+    conn.close()
+    return "Done"
+
+# API: Update a bookmark
+@app.post("/api/bookmarks/{id}/update")
+async def edit_bookmark(id: int, new_title: str = Form(...)):
+    conn = get_db()
+    cursor = conn.execute(
+        "UPDATE bookmarks SET title=? WHERE id=?",
+        (new_title, id)
+    )
+    conn.commit()
+    conn.close()
+    return "Done"
+
 # UI: Homepage
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
