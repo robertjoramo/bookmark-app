@@ -1,1 +1,3 @@
-__pycache__/.venv/bookmarks.db
+__pycache__/
+.venv/
+bookmarks.db
