@@ -116,8 +116,14 @@ async def add_bookmark(url: str = Form(...), title: Optional[str] = Form(None), 
         bookmark = cursor.fetchone()
         bookmark_id = bookmark["id"]
 
+        all_tags = []
+        for tag_input in tags:
+             all_tags.extend([t.strip() for t in tag_input.split(",")])
+
         # Insert tags and link them to the bookmark
-        for tag_name in tags:
+        for tag_name in all_tags:
+            if not tag_name:
+                continue
             # Get or create the tag
             tag_cursor = conn.execute(
                   "INSERT INTO tags (name) VALUES (?) ON CONFLICT(name) DO NOTHING RETURNING id, name",
