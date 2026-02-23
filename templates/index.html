@@ -5,29 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bookmark App</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
 </head>
 <body>
     <h1>Bookmark App</h1>
-    <form action="/api/bookmarks" method="post">
+    <form
+        hx-post="/api/bookmarks"
+        hx-target="#bookmarks_list"
+        hx-swap="afterbegin"
+        hx-on::after-request="if(event.detail.successful) this.reset()">
         <input type="text" name="url" placeholder="URL" required>
         <input type="text" name="title" placeholder="Title">
         <input type="text" name="tags" placeholder="Tags (comma-separated)">
         <button type="submit">Add Bookmark</button>
     </form>
-    <ul>
+    <ul id="bookmarks_list">
         {% for bookmark in bookmarks %}
-        <li>
-            <a href="{{ bookmark.url }}" target="_blank">
-                [{{ bookmark.id }}] {{ bookmark.title or bookmark.url }}
-            </a>
-            {% if bookmark.tags %}
-                (Tags: {% for tag in bookmark.tags %}#{{ tag.name }} {% endfor %})
-            {% endif %}
-            <form action="/api/bookmarks/{{ bookmark.id }}/delete" method="post"><button type="submit">Delete</button></form>
-            <form action="/api/bookmarks/{{ bookmark.id }}/update" method="post"><input type="text" name="new_title" placeholder="{{ bookmark.title or '' }}"><button type="submit">Update</button></form>
-        </li>
+            {% include "bookmark_item.html" %}
         {% endfor %}
     </ul>
-    
 </body>
 </html>
