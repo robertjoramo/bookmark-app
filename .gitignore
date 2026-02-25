@@ -1,5 +1,5 @@
 __pycache__/
 .venv/
 bookmarks.db
-.claude
-.vscode
+.claude/
+.vscode/
