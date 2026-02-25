@@ -13,11 +13,9 @@
             hx-target="#bookmark-{{ bookmark.id }}"
             hx-swap="outerHTML">X
     </button>
-    <form
-        hx-post="/api/bookmarks/{{ bookmark.id }}/update"
+    <button type="button"
+        hx-get="/api/bookmarks/{{ bookmark.id }}/edit"
         hx-target="#bookmark-{{ bookmark.id }}"
-        hx-swap="outerHTML">
-        <input type="text" name="new_title" placeholder="{{ bookmark.title or '' }}">
-            <button type="submit">Update</button>
-    </form>
+        hx-swap="outerHTML">Edit
+    </button>
 </li>

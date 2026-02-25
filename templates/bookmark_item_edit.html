@@ -7,9 +7,10 @@
         <input type="text" name="new_url" value="{{ bookmark.url }}">
         <input type="text" name="new_tags" value="{{ bookmark.tags | map(attribute='name') | join(', ') }}">
         <button type="submit">Save</button>
-        <button type="button"
+    </form>
+    <button type="button"
         hx-get="/api/bookmarks/{{ bookmark.id }}"
         hx-target="#bookmark-{{ bookmark.id }}"
-        hx-swap="outerHTML">Cancel</button>
-    </form>
+        hx-swap="outerHTML">Cancel
+    </button>
 </li>

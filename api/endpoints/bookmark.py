@@ -27,9 +27,9 @@ async def create_bookmark(request: Request, url: str = Form(...), title: Optiona
     return templates.TemplateResponse("bookmark_item.html", {"request": request, "bookmark": result})
 
 @router.post("/{bookmark_id}/update", response_class=HTMLResponse)
-async def update_bookmark(request: Request, bookmark_id: int, new_title: str = Form(...)):
+async def update_bookmark(request: Request, bookmark_id: int, new_title: str = Form(...), new_url: str = Form(...), new_tags: List[str] = Form ([])):
     with get_db() as conn:
-        result = bookmark_crud.update_bookmark_title(conn, bookmark_id, new_title)
+        result = bookmark_crud.update_bookmark(conn, bookmark_id, new_title, new_url, new_tags)
     if not result:
         raise HTTPException(status_code=404, detail="Bookmark not found")
     return templates.TemplateResponse("bookmark_item.html", {"request": request, "bookmark": result})
@@ -43,6 +43,14 @@ async def delete_bookmark(bookmark_id: int):
     return HTMLResponse(content="")
 
 @router.get("/{bookmark_id}", response_class=HTMLResponse)
+async def get_bookmark(request: Request, bookmark_id: int):
+    with get_db() as conn:
+        result = bookmark_crud.get_bookmark_by_id(conn, bookmark_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Bookmark not found")
+    return templates.TemplateResponse("bookmark_item.html", {"request": request, "bookmark": result})
+
+@router.get("/{bookmark_id}/edit", response_class=HTMLResponse)
 async def get_bookmark(request: Request, bookmark_id: int):
     with get_db() as conn:
         result = bookmark_crud.get_bookmark_by_id(conn, bookmark_id)
