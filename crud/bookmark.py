@@ -89,6 +89,48 @@ def update_bookmark_title(conn: sqlite3.Connection, bookmark_id: int, new_title:
     )
     return get_bookmark_by_id(conn, bookmark_id)
 
+
+def update_bookmark(conn: sqlite3.Connection, bookmark_id: int, new_title: Optional[str], new_url: Optional[str], new_tags: List[str]) -> Optional[dict]:
+    fields = []
+    values = []
+
+    if new_title is not None:
+        fields.append("title= ?")
+        values.append(new_title)
+    
+    if new_url is not None:
+        fields.append("url = ?")
+        values.append(new_url)
+
+    values.append(bookmark_id)
+
+    if fields:
+        sql = f'UPDATE bookmarks SET {", ".join(fields)} WHERE id = ?'
+        conn.execute(
+            sql,
+            values,
+        )
+
+    # DELETE exisitng tags
+    conn.execute(
+        "DELETE FROM bookmark_tags WHERE bookmark_id = ?",
+        (bookmark_id,)
+        )
+
+    # ADD new tags
+    for raw_tag in new_tags:
+        for tag_name in raw_tag.split(","):
+            tag_name = tag_name.strip()
+            if not tag_name:
+                continue
+            tag_id = _get_or_create(conn, tag_name)
+            conn.execute(
+                "INSERT OR IGNORE INTO bookmark_tags (bookmark_id, tag_id) VALUES (?, ?)",
+                (bookmark_id, tag_id)
+            )
+    return get_bookmark_by_id(conn, bookmark_id)
+
+
 def delete_bookmark(conn: sqlite3.Connection, bookmark_id: int) -> bool:
     cursor = conn.execute(
         "DELETE FROM bookmarks WHERE id = ?", (bookmark_id,)

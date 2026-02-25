@@ -41,3 +41,11 @@ async def delete_bookmark(bookmark_id: int):
     if not deleted:
         raise HTTPException(status_code=404, detail="Bookmark not found")
     return HTMLResponse(content="")
+
+@router.get("/{bookmark_id}", response_class=HTMLResponse)
+async def get_bookmark(request: Request, bookmark_id: int):
+    with get_db() as conn:
+        result = bookmark_crud.get_bookmark_by_id(conn, bookmark_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Bookmark not found")
+    return templates.TemplateResponse("bookmark_item_edit.html", {"request": request, "bookmark": result})

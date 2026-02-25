@@ -3,11 +3,15 @@
         [{{ bookmark.id }}] {{ bookmark.title or bookmark.url }}
     </a>
     {% if bookmark.tags %}
-        (Tags: {% for tag in bookmark.tags %}#{{ tag.name }} {% endfor %})
+        <div class="tags">
+            {% for tag in bookmark.tags %}  
+                <span class="tag">{{ tag.name }}</span>
+            {% endfor %}
+        </div>
     {% endif %}
     <button hx-post="/api/bookmarks/{{ bookmark.id }}/delete"
             hx-target="#bookmark-{{ bookmark.id }}"
-            hx-swap="outerHTML">
+            hx-swap="outerHTML">X
     </button>
     <form
         hx-post="/api/bookmarks/{{ bookmark.id }}/update"
