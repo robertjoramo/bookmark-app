@@ -11,7 +11,7 @@ class Tag(TagBase):
     id: int
 
     class Config:
-        from_attribues = True
+        from_attributes = True
 
 # BOOKMARKS
 

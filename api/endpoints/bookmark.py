@@ -51,7 +51,7 @@ async def get_bookmark(request: Request, bookmark_id: int):
     return templates.TemplateResponse("bookmark_item.html", {"request": request, "bookmark": result})
 
 @router.get("/{bookmark_id}/edit", response_class=HTMLResponse)
-async def get_bookmark(request: Request, bookmark_id: int):
+async def get_bookmark_edit(request: Request, bookmark_id: int):
     with get_db() as conn:
         result = bookmark_crud.get_bookmark_by_id(conn, bookmark_id)
     if not result:

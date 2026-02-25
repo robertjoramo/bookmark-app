@@ -91,7 +91,6 @@ def update_bookmark_title(conn: sqlite3.Connection, bookmark_id: int, new_title:
 
 
 def update_bookmark(conn: sqlite3.Connection, bookmark_id: int, new_title: Optional[str], new_url: Optional[str], new_tags: List[str]) -> Optional[dict]:
-    print(f"Updating bookmark {bookmark_id}: title={new_title}, url={new_url}, tags={new_tags}")
     fields = []
     values = []
 

@@ -25,11 +25,21 @@ def get_db():
 def init_db():
     with get_db() as conn:
         conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id      INTEGER PRIMARY KEY AUTOINCREMENT,
+                username     TEXT UNIQUE NOT NULL,
+                password_hash   TEXT NOT NULL
+            )
+        """)
+        
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS bookmarks (
                 id      INTEGER PRIMARY KEY AUTOINCREMENT,
                 url     TEXT NOT NULL,
                 title   TEXT,
-                favicon TEXT
+                favicon TEXT,
+                user_id INTEGER NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         """)
 
