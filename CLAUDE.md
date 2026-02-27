@@ -106,7 +106,7 @@ bookmark-app/
 - **Simplicity first**: Prefer readable, simple code over clever one-liners
 - **Explain before adding**: Before adding a new dependency or pattern, explain what it does and why we need it
 
----
+--- 
 
 ## Running the App Locally
 
