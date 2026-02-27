@@ -13,9 +13,14 @@
         hx-post="/api/bookmarks"
         hx-target="#bookmarks_list"
         hx-swap="afterbegin"
-        hx-on::after-request="if(event.detail.successful) this.reset()">
-        <input type="text" name="url" placeholder="URL" required>
-        <input type="text" name="title" placeholder="Title">
+        hx-on::after-request="if(event.detail.successful && event.detail.elt === this) this.reset()">
+        <input type="text" name="url" placeholder="URL" required
+        hx-get="/api/bookmarks/fetch-title"
+        hx-trigger="input delay:100ms"
+        hx-target="#title-input"
+        hx-swap="outerHTML"
+        >
+        <input type="text" name="title" id="title-input" placeholder="Title">
         <input type="text" name="tags" placeholder="Tags (comma-separated)">
         <button type="submit">Add Bookmark</button>
     </form>
@@ -24,5 +29,9 @@
             {% include "bookmark_item.html" %}
         {% endfor %}
     </ul>
+    <hr>
+    <form method="POST" action="/logout">
+        <button type="submit" class="subtle">logout</button>
+    </form>
 </body>
 </html>

@@ -30,12 +30,17 @@ A lightweight, self-hosted bookmark/link manager for personal use and close fami
 
 ## Planned Features
 
-- [ ] Clean, minimal UI (Linkding-inspired)
-- [ ] Add / edit / delete bookmarks (URL + title + tags)
+- [x] Clean, minimal UI (Linkding-inspired)
+- [x] Add / edit / delete bookmarks (URL + title + tags)
 - [ ] Tag-based organization and filtering
 - [ ] Full-text search across bookmarks
-- [ ] Multi-user support (family members with their own bookmarks)
+- [x] Multi-user support (family members with their own bookmarks)
+- [x] Auto-fill title from URL (fetches page title on input, via /api/bookmarks/fetch-title)
+- [x] Favicon display (Google favicon service, domain extracted via Jinja2 filter)
+- [ ] Tag-based organization and filtering
+- [ ] Full-text search across bookmarks
 - [ ] Docker deployment with simple setup
+- [ ] Description and Notes to bookmarks
 
 ---
 
@@ -43,22 +48,29 @@ A lightweight, self-hosted bookmark/link manager for personal use and close fami
 
 ```
 bookmark-app/
-├── CLAUDE.md                    ← you are here
-├── main.py                      # FastAPI app entry point — registers routes, starts the app
+├── CLAUDE.md                        ← you are here
+├── main.py                          # FastAPI app entry point — registers routes, starts the app
+├── create_user.py                   # CLI script to create users (run from project root)
 ├── api/
+│   ├── dependencies.py              # Shared dependencies — require_login
+│   ├── templates.py                 # Shared Jinja2Templates instance + custom filters (domain)
 │   └── endpoints/
-│       └── bookmark.py          # Route handlers — what happens when a URL is visited
+│       ├── bookmark.py              # Route handlers for bookmarks
+│       └── auth.py                  # Login/logout routes
 ├── crud/
-│   └── bookmark.py              # Database logic — how we read/write data
+│   ├── bookmark.py                  # Database logic for bookmarks (all scoped by user_id)
+│   └── user.py                      # Database logic for users
 ├── models/
-│   └── schemas.py               # Pydantic models — define the shape of our data
+│   └── schemas.py                   # Pydantic models — define the shape of our data
 ├── database/
-│   └── session.py               # SQLite connection management
+│   └── session.py                   # SQLite connection management
 ├── templates/
-│   ├── index.html               # Main UI page
-│   └── bookmark_item.html       # Reusable bookmark component (used by HTMX)
+│   ├── index.html                   # Main UI page
+│   ├── bookmark_item.html           # Reusable bookmark component (used by HTMX)
+│   ├── bookmark_item_edit.html      # Edit form component (used by HTMX)
+│   └── login.html                   # Login page
 └── static/
-    └── style.css                # All styling
+    └── style.css                    # All styling
 ```
 
 ---
@@ -115,3 +127,7 @@ Then open your browser at: `http://localhost:8000`
 > Use this section to log important decisions made during development, so future sessions have context.
 
 - **2026-02-25**: Project started. Stack chosen: FastAPI + HTMX + SQLite + Jinja2. Learning project — Robert writes as much as possible.
+- **2026-02-26**: Auth fully completed and tested. Added: users table, user_id on bookmarks, crud/user.py, api/endpoints/auth.py, api/dependencies.py (require_login), login.html, SessionMiddleware, create_user.py. All bookmark routes and crud functions are now scoped by user_id. Logout button added to index.html.
+- **2026-02-26**: Dependency notes — bcrypt must be pinned to 4.0.1 (newer versions break passlib). itsdangerous must be installed separately for SessionMiddleware.
+- **2026-02-27**: Added auto-fill title from URL. New endpoint GET /api/bookmarks/fetch-title fetches page HTML and extracts the <title> tag using regex (httpx + re). HTMX triggers on `input delay:100ms` from the URL field and swaps the title input via outerHTML. html.escape() used on title to prevent broken HTML attributes.
+- **2026-02-27**: Added favicon display using Google's favicon service (https://www.google.com/s2/favicons?domain=...). Domain extracted from URL using a custom Jinja2 filter (`domain`) registered in api/templates.py. Templates instance moved to api/templates.py (shared) to avoid duplicate instances and missing filters across routes. httpx added as a dependency (uv pip install httpx).

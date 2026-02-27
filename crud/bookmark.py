@@ -25,16 +25,16 @@ def _rows_to_bookmarks(rows) -> List[dict]:
             bookmarks[bid]["tags"].append({"id": row["tag_id"], "name": row["tag_name"]})
     return list(bookmarks.values())
 
-def get_all_bookmarks(conn: sqlite3.Connection) -> List[dict]:
-    rows = conn.execute(BOOKMARK_SELECT + " ORDER BY b.id DESC").fetchall()
+def get_all_bookmarks(conn: sqlite3.Connection, user_id: int) -> List[dict]:
+    rows = conn.execute(BOOKMARK_SELECT + " WHERE b.user_id = ? ORDER BY b.id DESC", (user_id,)).fetchall()
     return _rows_to_bookmarks(rows)
 
-def get_bookmark_by_id(conn: sqlite3.Connection, bookmark_id: int) -> Optional[dict]:
-    rows = conn.execute(BOOKMARK_SELECT + " WHERE b.id = ?", (bookmark_id,)).fetchall()
+def get_bookmark_by_id(conn: sqlite3.Connection, bookmark_id: int, user_id: int) -> Optional[dict]:
+    rows = conn.execute(BOOKMARK_SELECT + " WHERE b.id = ? AND b.user_id = ?", (bookmark_id, user_id)).fetchall()
     results = _rows_to_bookmarks(rows)
     return results[0] if results else None
 
-def get_bookmarks_by_tag(conn: sqlite3.Connection, tag_name: str) -> List[dict]:
+def get_bookmarks_by_tag(conn: sqlite3.Connection, tag_name: str, user_id: int) -> List[dict]:
     rows = conn.execute(
         BOOKMARK_SELECT + """
         WHERE b.id IN (
@@ -43,9 +43,10 @@ def get_bookmarks_by_tag(conn: sqlite3.Connection, tag_name: str) -> List[dict]:
             JOIN tags t2 ON bt2.tag_id = t2.id
             WHERE t2.name = ?
         )
+        AND b.user_id = ?
         ORDER BY b.id DESC
         """,
-        (tag_name,),
+        (tag_name, user_id),
     ).fetchall()
     return _rows_to_bookmarks(rows)
 
@@ -63,10 +64,11 @@ def create_bookmark(
         title: Optional[str],
         favicon: Optional[str],
         tag_names: List[str],
+        user_id: int
 ) -> Optional[dict]:
     cursor = conn.execute(
-        "INSERT INTO bookmarks (url, title, favicon) VALUES (?, ?, ?) RETURNING id",
-        (url, title, favicon),
+        "INSERT INTO bookmarks (url, title, favicon, user_id) VALUES (?, ?, ?, ?) RETURNING id",
+        (url, title, favicon, user_id),
     )
     bookmark_id = cursor.fetchone()["id"]
 
@@ -80,17 +82,13 @@ def create_bookmark(
                 "INSERT OR IGNORE INTO bookmark_tags (bookmark_id, tag_id) VALUES (?, ?)",
                 (bookmark_id, tag_id)
             )
-    return get_bookmark_by_id(conn, bookmark_id)
+    return get_bookmark_by_id(conn, bookmark_id, user_id)
 
-def update_bookmark_title(conn: sqlite3.Connection, bookmark_id: int, new_title: str) -> Optional[dict]:
-    conn.execute(
-        "UPDATE bookmarks SET title = ? WHERE id = ?",
-        (new_title, bookmark_id),
-    )
-    return get_bookmark_by_id(conn, bookmark_id)
-
-
-def update_bookmark(conn: sqlite3.Connection, bookmark_id: int, new_title: Optional[str], new_url: Optional[str], new_tags: List[str]) -> Optional[dict]:
+def update_bookmark(conn: sqlite3.Connection, bookmark_id: int, new_title: Optional[str], new_url: Optional[str], new_tags: List[str], user_id: int) -> Optional[dict]:
+    # Check the user owns this bookmark before changing anything
+    existing = get_bookmark_by_id(conn, bookmark_id, user_id)
+    if not existing:
+        return None
     fields = []
     values = []
 
@@ -103,9 +101,10 @@ def update_bookmark(conn: sqlite3.Connection, bookmark_id: int, new_title: Optio
         values.append(new_url)
 
     values.append(bookmark_id)
+    values.append(user_id)
 
     if fields:
-        sql = f'UPDATE bookmarks SET {", ".join(fields)} WHERE id = ?'
+        sql = f'UPDATE bookmarks SET {", ".join(fields)} WHERE id = ? AND user_id = ?'
         conn.execute(
             sql,
             values,
@@ -128,12 +127,11 @@ def update_bookmark(conn: sqlite3.Connection, bookmark_id: int, new_title: Optio
                 "INSERT OR IGNORE INTO bookmark_tags (bookmark_id, tag_id) VALUES (?, ?)",
                 (bookmark_id, tag_id)
             )
-    return get_bookmark_by_id(conn, bookmark_id)
+    return get_bookmark_by_id(conn, bookmark_id, user_id)
 
 
-def delete_bookmark(conn: sqlite3.Connection, bookmark_id: int) -> bool:
+def delete_bookmark(conn: sqlite3.Connection, bookmark_id: int, user_id: int) -> bool:
     cursor = conn.execute(
-        "DELETE FROM bookmarks WHERE id = ?", (bookmark_id,)
+        "DELETE FROM bookmarks WHERE id = ? AND user_id = ?", (bookmark_id, user_id)
     )
     return cursor.rowcount > 0
-
