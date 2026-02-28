@@ -60,3 +60,8 @@ def init_db():
                 FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
             )
         """)
+
+        try:
+            conn.execute("ALTER TABLE bookmarks ADD COLUMN description TEXT")
+        except Exception:
+            pass  # Column already exists, ignore error

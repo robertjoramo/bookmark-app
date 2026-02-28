@@ -5,6 +5,7 @@
         hx-swap="outerHTML">
         <input type="text" name="new_title" value="{{ bookmark.title or '' }}">
         <input type="text" name="new_url" value="{{ bookmark.url }}">
+        <textarea name="new_description">{{ bookmark.description or '' }}</textarea>
         <input type="text" name="new_tags" value="{{ bookmark.tags | map(attribute='name') | join(', ') }}">
         <button type="submit">Save</button>
     </form>

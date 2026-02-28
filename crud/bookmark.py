@@ -2,7 +2,7 @@ import sqlite3
 from typing import List, Optional
 
 BOOKMARK_SELECT = """
-    SELECT b.id, b.url, b.title, b.favicon,
+    SELECT b.id, b.url, b.title, b.favicon, b.description,
         t.id AS tag_id, t.name AS tag_name
     FROM bookmarks b
     LEFT JOIN bookmark_tags bt ON b.id = bt.bookmark_id
@@ -18,6 +18,7 @@ def _rows_to_bookmarks(rows) -> List[dict]:
                 "id": bid,
                 "url": row["url"],
                 "title": row["title"],
+                "description": row["description"],
                 "favicon": row["favicon"],
                 "tags": [],
             }
@@ -63,12 +64,13 @@ def create_bookmark(
         url: str,
         title: Optional[str],
         favicon: Optional[str],
+        description: Optional[str],
         tag_names: List[str],
         user_id: int
 ) -> Optional[dict]:
     cursor = conn.execute(
-        "INSERT INTO bookmarks (url, title, favicon, user_id) VALUES (?, ?, ?, ?) RETURNING id",
-        (url, title, favicon, user_id),
+        "INSERT INTO bookmarks (url, title, favicon, description, user_id) VALUES (?, ?, ?, ?, ?) RETURNING id",
+        (url, title, favicon, description, user_id),
     )
     bookmark_id = cursor.fetchone()["id"]
 
@@ -84,7 +86,7 @@ def create_bookmark(
             )
     return get_bookmark_by_id(conn, bookmark_id, user_id)
 
-def update_bookmark(conn: sqlite3.Connection, bookmark_id: int, new_title: Optional[str], new_url: Optional[str], new_tags: List[str], user_id: int) -> Optional[dict]:
+def update_bookmark(conn: sqlite3.Connection, bookmark_id: int, new_title: Optional[str], new_url: Optional[str], new_description: Optional[str], new_tags: List[str], user_id: int) -> Optional[dict]:
     # Check the user owns this bookmark before changing anything
     existing = get_bookmark_by_id(conn, bookmark_id, user_id)
     if not existing:
@@ -95,6 +97,10 @@ def update_bookmark(conn: sqlite3.Connection, bookmark_id: int, new_title: Optio
     if new_title is not None:
         fields.append("title= ?")
         values.append(new_title)
+
+    if new_description is not None:
+        fields.append("description = ?")
+        values.append(new_description)
     
     if new_url is not None:
         fields.append("url = ?")

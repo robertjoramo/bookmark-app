@@ -37,10 +37,19 @@ A lightweight, self-hosted bookmark/link manager for personal use and close fami
 - [x] Multi-user support (family members with their own bookmarks)
 - [x] Auto-fill title from URL (fetches page title on input, via /api/bookmarks/fetch-title)
 - [x] Favicon display (Google favicon service, domain extracted via Jinja2 filter)
-- [ ] Tag-based organization and filtering
-- [ ] Full-text search across bookmarks
 - [ ] Docker deployment with simple setup
-- [ ] Description and Notes to bookmarks
+- [x] Description field for bookmarks
+- [ ] Auto-pull description field from url
+- [ ] Notes field for bookmarks
+- [ ] Settings page (Colors/Theme, toogle auto-fill title, toggle auto-fill description ++)
+- [ ] Account settings page (export / Import feature?, other features?)
+- [ ] Sort options of bookmarks (date, title, domain)
+- [ ] Duplicate detection. If a bookmark url already exist, inform user
+- [ ] Bookmark link checker
+- [ ] Admin panel (UI) - Creating users etc.
+- [ ] Dark/Light mode
+- [ ] Redesign for mobile.
+- [ ] Keyboard Shortcuts
 
 ---
 
@@ -131,3 +140,4 @@ Then open your browser at: `http://localhost:8000`
 - **2026-02-26**: Dependency notes — bcrypt must be pinned to 4.0.1 (newer versions break passlib). itsdangerous must be installed separately for SessionMiddleware.
 - **2026-02-27**: Added auto-fill title from URL. New endpoint GET /api/bookmarks/fetch-title fetches page HTML and extracts the <title> tag using regex (httpx + re). HTMX triggers on `input delay:100ms` from the URL field and swaps the title input via outerHTML. html.escape() used on title to prevent broken HTML attributes.
 - **2026-02-27**: Added favicon display using Google's favicon service (https://www.google.com/s2/favicons?domain=...). Domain extracted from URL using a custom Jinja2 filter (`domain`) registered in api/templates.py. Templates instance moved to api/templates.py (shared) to avoid duplicate instances and missing filters across routes. httpx added as a dependency (uv pip install httpx).
+- **2026-03-01**: Added description field to bookmarks. DB migration via ALTER TABLE in init_db() wrapped in try/except. Description flows through all layers: DB → CRUD → schemas → API endpoint → templates. Displayed conditionally in bookmark_item.html, editable via textarea in both add form (index.html) and edit form (bookmark_item_edit.html). BookmarkUpdate schema also updated to include url and tags as Optional fields.

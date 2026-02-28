@@ -49,15 +49,15 @@ async def get_bookmarks_by_tag(tag_name: str, user_id: int = Depends(require_log
         return bookmark_crud.get_bookmarks_by_tag(conn, tag_name, user_id)
 
 @router.post("", response_class=HTMLResponse)
-async def create_bookmark(request: Request, url: str = Form(...), title: Optional[str] = Form(None), tags: List[str] = Form ([]), user_id: int = Depends(require_login)):
+async def create_bookmark(request: Request, url: str = Form(...), title: Optional[str] = Form(None), description: Optional[str] = Form(None), tags: List[str] = Form ([]), user_id: int = Depends(require_login)):
     with get_db() as conn:
-        result = bookmark_crud.create_bookmark(conn, url, title, favicon=None, tag_names=tags, user_id=user_id)
+        result = bookmark_crud.create_bookmark(conn, url, title, favicon=None, description=description, tag_names=tags, user_id=user_id)
     return templates.TemplateResponse("bookmark_item.html", {"request": request, "bookmark": result})
 
 @router.post("/{bookmark_id}/update", response_class=HTMLResponse)
-async def update_bookmark(request: Request, bookmark_id: int, new_title: str = Form(...), new_url: str = Form(...), new_tags: List[str] = Form ([]), user_id: int = Depends(require_login)):
+async def update_bookmark(request: Request, bookmark_id: int, new_title: str = Form(...), new_url: str = Form(...), new_description: Optional[str] = Form(None), new_tags: List[str] = Form ([]), user_id: int = Depends(require_login)):
     with get_db() as conn:
-        result = bookmark_crud.update_bookmark(conn, bookmark_id, new_title, new_url, new_tags, user_id)
+        result = bookmark_crud.update_bookmark(conn, bookmark_id, new_title, new_url, new_description, new_tags, user_id)
     if not result:
         raise HTTPException(status_code=404, detail="Bookmark not found")
     return templates.TemplateResponse("bookmark_item.html", {"request": request, "bookmark": result})

@@ -2,6 +2,9 @@
     <a href="{{ bookmark.url }}" target="_blank">
        <img src="https://www.google.com/s2/favicons?domain={{ bookmark.url | domain }}&sz=16"> {{ bookmark.title or bookmark.url }}
     </a>
+    {% if bookmark.description %}
+        <p class="description">{{ bookmark.description }}</p>
+    {% endif %}
     {% if bookmark.tags %}
         <div class="tags">
             {% for tag in bookmark.tags %}  
