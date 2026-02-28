@@ -1,4 +1,3 @@
-/* Modern Sleek Bookmark App Design */
 :root {
     --bg: #fafafa;
     --text: #1a1a1a;
@@ -7,13 +6,11 @@
     --accent-hover: #3a5bef;
     --border: #e5e7eb;
     --hover: #f3f4f6;
-    --radius: 8px;
+    --radius: 6px;
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     font-family: var(--font);
@@ -21,8 +18,8 @@ body {
     color: var(--text);
     line-height: 1.5;
     margin: 0 auto;
-    padding: 2.5rem 1.5rem;
-    max-width: 900px;
+    padding: 2rem 1.5rem;
+    max-width: 860px;
     font-size: 0.95rem;
 }
 
@@ -32,88 +29,80 @@ h1 {
     margin: 0 0 1.5rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--border);
-    letter-spacing: -0.01em;
-    color: var(--text);
 }
 
-/* Add form */
-form.add-form {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.75rem;
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 0.6rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-}
-
-form.add-form input[type="text"] {
-    border: none;
-    background: transparent;
-    padding: 0.4rem 0.5rem;
-    font-size: 0.9rem;
-}
-
-form.add-form input[type="text"]:focus {
-    outline: none;
-}
-
-form.add-form input[name="url"] {
-    flex: 2;
-}
-
-form.add-form input[name="title"] {
-    flex: 1.5;
-}
-
-form.add-form input[name="tags"] {
-    flex: 1;
-}
-
-form.add-form button[type="submit"] {
-    padding: 0.45rem 1rem;
-    font-size: 0.875rem;
-    white-space: nowrap;
-    border-radius: 6px;
-}
-
-/* General input */
-input[type="text"] {
-    flex: 1;
+/* ── Inputs & textarea ── */
+input[type="text"],
+textarea {
+    width: 100%;
     padding: 0.5rem 0.7rem;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: var(--radius);
     font-family: inherit;
     font-size: 0.875rem;
     background: white;
-    transition: border-color 0.15s;
 }
 
-input[type="text"]:focus {
+input[type="text"]:focus,
+textarea:focus {
     outline: none;
     border-color: var(--accent);
 }
 
-/* General button */
+textarea {
+    resize: vertical;
+    min-height: 3.5rem;
+}
+
+/* ── Buttons ── */
 button {
     padding: 0.5rem 1rem;
     background: var(--accent);
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--radius);
     cursor: pointer;
     font-family: inherit;
     font-size: 0.875rem;
     font-weight: 500;
-    transition: background 0.15s;
 }
 
-button:hover {
-    background: var(--accent-hover);
+button:hover { background: var(--accent-hover); }
+
+/* Subtle / ghost button (logout, cancel) */
+button.subtle {
+    background: none;
+    color: var(--subtext);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
 }
 
-/* Bookmark list */
+button.subtle:hover {
+    color: var(--text);
+    background: var(--hover);
+}
+
+/* ── Add bookmark form ── */
+form[hx-post="/api/bookmarks"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.75rem;
+}
+
+/* The title+description wrapper div stacks its children too */
+#metadata-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Submit button shouldn't stretch full width */
+form[hx-post="/api/bookmarks"] button {
+    align-self: flex-start;
+}
+
+/* ── Bookmark list ── */
 ul {
     list-style: none;
     padding: 0;
@@ -121,45 +110,39 @@ ul {
 }
 
 li {
-    padding: 0.65rem 0.5rem;
+    padding: 0.6rem 0.4rem;
     border-bottom: 1px solid var(--border);
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 0.6rem;
-    border-radius: 4px;
-    transition: background 0.1s;
+    gap: 0.4rem;
 }
 
-li:last-child {
-    border-bottom: none;
-}
+li:last-child { border-bottom: none; }
+li:hover { background: var(--hover); }
 
-li:hover {
-    background: var(--hover);
-}
-
-/* Bookmark link */
+/* Title link — takes up remaining space on the first row */
 li > a {
+    flex: 1;
+    order: 1;
+    min-width: 0;
     color: var(--text);
     text-decoration: none;
-    flex: 1;
     font-size: 0.9rem;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: color 0.15s;
 }
 
-li > a:hover {
-    color: var(--accent);
-}
+li > a:hover { color: var(--accent); }
 
-/* Tags */
+/* Tags sit next to the title on row 1 */
 .tags {
     display: flex;
     gap: 0.3rem;
     flex-shrink: 0;
+    order: 2;
 }
 
 .tag {
@@ -172,73 +155,48 @@ li > a:hover {
     white-space: nowrap;
 }
 
-/* Delete button */
-form[action*="delete"] button,
-button.delete-btn {
+/* X and Edit buttons sit on row 1 after tags */
+li > button {
+    order: 3;
     background: none;
-    padding: 0.25rem 0.4rem;
+    color: var(--subtext);
+    padding: 0.2rem 0.5rem;
     font-size: 0.8rem;
-    color: #d1d5db;
-    border-radius: 4px;
-    line-height: 1;
-}
-
-form[action*="delete"] button:hover,
-button.delete-btn:hover {
-    color: #ef4444;
-    background: #fef2f2;
-}
-
-/* Update form */
-form[action*="update"],
-form.update-form {
-    display: flex;
-    gap: 0.35rem;
-    align-items: center;
     flex-shrink: 0;
 }
 
-form[action*="update"] input,
-form.update-form input {
-    padding: 0.25rem 0.5rem;
+li > button:hover {
+    background: var(--hover);
+    color: var(--text);
+}
+
+/* Description drops to its own row below everything */
+.description {
+    order: 10;
+    flex-basis: 100%;
+    margin: 0;
     font-size: 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    width: 130px;
+    color: var(--subtext);
+    line-height: 1.4;
 }
 
-form[action*="update"] button,
-form.update-form button {
-    background: none;
-    color: var(--accent);
-    padding: 0.25rem 0.5rem;
-    font-size: 0.8rem;
-    border-radius: 5px;
+/* ── Edit form (inside a li) ── */
+li form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
 }
 
-form[action*="update"] button:hover,
-form.update-form button:hover {
-    background: #eff2ff;
+li form input[type="text"],
+li form textarea {
+    font-size: 0.85rem;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    body {
-        padding: 1rem;
-    }
-
-    form.add-form {
-        flex-direction: column;
-        gap: 0.3rem;
-    }
-
-    form.add-form input[type="text"],
-    form.add-form button {
-        width: 100%;
-    }
-
-    li {
-        flex-wrap: wrap;
-        gap: 0.4rem;
-    }
+/* ── Divider above logout ── */
+hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.5rem 0;
 }

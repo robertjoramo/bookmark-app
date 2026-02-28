@@ -17,22 +17,29 @@ import html
 router = APIRouter(prefix="/api/bookmarks", tags=["bookmarks"]) # Prefix so we dont need to write "/api/bookmarks" on every @router. below. Tags is for documentation on /docs page
 
 
-
-# GET TITLE FROM URL #
-@router.get("/fetch-title", response_class=HTMLResponse)
-async def fetch_title(url: str = "", user_id: int = Depends(require_login)):
+# GET METADATA FROM URL #
+@router.get("/fetch-metadata", response_class=HTMLResponse)
+async def fetch_metadata(url: str = "", user_id: int = Depends(require_login)):
     title = ""
+    description = ""
     if url:
         try:
             async with httpx.AsyncClient(timeout=5, follow_redirects=True) as client:
                 response = await client.get(url)
-                match = re.search(r'<title>(.*?)<\/title>', response.text, re.IGNORECASE)
-                if match:
-                    title = match.group(1)
+                match_title = re.search(r'<title>(.*?)<\/title>', response.text, re.IGNORECASE)
+                if match_title:
+                    title = match_title.group(1)
+                match_desc = re.search(r'<meta[^>]+name=["\']description["\'][^>]*>', response.text, re.IGNORECASE)
+                if match_desc:
+                    content_match = re.search(r'content=["\'](.*?)["\']', match_desc.group(0), re.IGNORECASE)
+                    if content_match:
+                        description = content_match.group(1)
         except Exception:
             pass
-    return f'<input type ="text" name="title" id="title-input" placeholder="Title" value="{html.escape(title)}">'
-    
+    return f'''
+        <input type="text" name="title" placeholder="Title" value="{html.escape(title)}">
+        <textarea name="description" placeholder="Description">{html.escape(description)}</textarea>
+    '''
 
 
 

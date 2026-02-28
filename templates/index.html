@@ -6,6 +6,15 @@
     <title>Bookmark App</title>
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
+    <script>
+        function resetForm(form) {
+            form.reset();
+            document.getElementById('metadata-fields').innerHTML = `
+                <input type="text" name="title" placeholder="Title">
+                <textarea name="description" placeholder="Description"></textarea>
+            `;
+        }
+    </script>
 </head>
 <body>
     <h1>Bookmark App</h1>
@@ -13,15 +22,16 @@
         hx-post="/api/bookmarks"
         hx-target="#bookmarks_list"
         hx-swap="afterbegin"
-        hx-on::after-request="if(event.detail.successful && event.detail.elt === this) this.reset()">
+        hx-on::after-request="if(event.detail.successful && event.detail.elt === this) resetForm(this)">
         <input type="text" name="url" placeholder="URL" required
-        hx-get="/api/bookmarks/fetch-title"
-        hx-trigger="input delay:100ms"
-        hx-target="#title-input"
-        hx-swap="outerHTML"
-        >
-        <input type="text" name="title" id="title-input" placeholder="Title">
-        <textarea name="description" placeholder="Description"></textarea>
+        hx-get="/api/bookmarks/fetch-metadata"
+        hx-trigger="input delay:200ms"
+        hx-target="#metadata-fields"
+        hx-swap="innerHTML">
+        <div id="metadata-fields">
+            <input type="text" name="title" placeholder="Title">
+            <textarea name="description" placeholder="Description"></textarea>
+        </div>
         <input type="text" name="tags" placeholder="Tags (comma-separated)">
         <button type="submit">Add Bookmark</button>
     </form>
